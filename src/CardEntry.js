@@ -74,9 +74,7 @@ async function startCardEntryFlow(cardEntryConfig, onCardNonceRequestSuccess, on
   await RNSQIPCardEntry.startCardEntryFlow(cardEntryInternalConfig.collectPostalCode);
 }
 
-async function startCardEntryFlowWithBuyerVerification(
-  cardEntryConfig, onBuyerVerificationSuccess, onBuyerVerificationFailure, onCardEntryCancel,
-) {
+async function startCardEntryFlowWithBuyerVerification(cardEntryConfig, onBuyerVerificationSuccess, onBuyerVerificationFailure, onCardEntryCancel) {
   let cardEntryInternalConfig = {};
   if (cardEntryConfig) {
     Utilities.verifyObjectType(cardEntryConfig, 'cardEntryConfig should be an object.');
@@ -110,9 +108,7 @@ async function startCardEntryFlowWithBuyerVerification(
   buyerVerificationSuccessCallback = onBuyerVerificationSuccess;
   buyerVerificationErrorCallback = onBuyerVerificationFailure;
   cardEntryCancelCallback = onCardEntryCancel;
-  await RNSQIPCardEntry.startCardEntryFlowWithVerification(
-    cardEntryInternalConfig.collectPostalCode, squareLocationId, buyerAction, money, contact,
-  );
+  await RNSQIPCardEntry.startCardEntryFlowWithVerification(cardEntryInternalConfig.collectPostalCode, squareLocationId, buyerAction, money, contact);
 }
 
 async function startGiftCardEntryFlow(onCardNonceRequestSuccess, onCardEntryCancel) {
@@ -136,6 +132,42 @@ async function setIOSCardEntryTheme(theme) {
   await RNSQIPCardEntry.setTheme(theme);
 }
 
+async function verifyBuyerCard(cardId, cardEntryConfig, onBuyerVerificationSuccess, onBuyerVerificationFailure) {
+  let cardEntryInternalConfig = {};
+  if (cardEntryConfig) {
+    Utilities.verifyObjectType(cardEntryConfig, 'cardEntryConfig should be an object.');
+    cardEntryInternalConfig = cardEntryConfig;
+  }
+  if (cardEntryInternalConfig.collectPostalCode != null) {
+    Utilities.verifyBooleanType(cardEntryInternalConfig.collectPostalCode, 'cardEntryConfig.collectPostalCode should be a boolean.');
+  } else {
+    // the default collectPostalCode is true
+    cardEntryInternalConfig.collectPostalCode = true;
+  }
+
+  const { squareLocationId } = cardEntryConfig;
+  const { buyerAction } = cardEntryConfig;
+  const money = {
+    amount: cardEntryConfig.amount,
+    currencyCode: cardEntryConfig.currencyCode,
+  };
+  const contact = {
+    givenName: cardEntryConfig.givenName,
+    familyName: cardEntryConfig.familyName,
+    addressLines: cardEntryConfig.addressLines,
+    city: cardEntryConfig.city,
+    countryCode: cardEntryConfig.countryCode,
+    email: cardEntryConfig.email,
+    phone: cardEntryConfig.phone,
+    postalCode: cardEntryConfig.postalCode,
+    region: cardEntryConfig.region,
+  };
+
+  buyerVerificationSuccessCallback = onBuyerVerificationSuccess;
+  buyerVerificationErrorCallback = onBuyerVerificationFailure;
+  await RNSQIPCardEntry.verifyBuyerCard(cardId, cardEntryInternalConfig.collectPostalCode, squareLocationId, buyerAction, money, contact);
+}
+
 export default Platform.select({
   ios: {
     startGiftCardEntryFlow,
@@ -144,6 +176,7 @@ export default Platform.select({
     completeCardEntry,
     showCardNonceProcessingError,
     setIOSCardEntryTheme,
+    verifyBuyerCard
   },
   android: {
     startGiftCardEntryFlow,
@@ -151,5 +184,6 @@ export default Platform.select({
     startCardEntryFlowWithBuyerVerification,
     completeCardEntry,
     showCardNonceProcessingError,
+    verifyBuyerCard,
   },
 });
