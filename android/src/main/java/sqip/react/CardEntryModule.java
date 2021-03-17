@@ -238,7 +238,7 @@ class CardEntryModule extends ReactContextBaseJavaModule {
     this.squareIdentifier = squareIdentifier;
     this.buyerAction = buyerAction;
     this.contact = contact;
-    this.cardId = cardId;
+    this.cardId = null;
 
     mainLooperHandler.post(new Runnable() {
       @Override
